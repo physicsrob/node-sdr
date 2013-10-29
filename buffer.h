@@ -22,6 +22,7 @@ public:
     SAMPLE *getData() { return &buf[len*channels]; }
     int getLen() { return len; }
     int getChannels() { return channels; }
+    float getSampleRate() { return sampleRate; }
 
     // Convenience methods
     float getAvgSqr() {
