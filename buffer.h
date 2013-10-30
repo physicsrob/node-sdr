@@ -15,7 +15,7 @@ public:
     Buffer(int channels, int len, float sampleRate);
     Buffer(const Buffer &b, int sampleRatio = 1);
     ~Buffer();
-    void addData(SAMPLE *data);
+    void addData(const SAMPLE *data);
     void shiftData();
 
 

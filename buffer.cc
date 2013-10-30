@@ -16,7 +16,7 @@ Buffer::Buffer(const Buffer &b, int sampleRatio) : channels(b.channels), len(b.l
 Buffer::~Buffer() {
 }
 
-void Buffer::addData(SAMPLE *data) {
+void Buffer::addData(const SAMPLE *data) {
         shiftData();
         memcpy(&buf[channels*len], data, sizeof(SAMPLE)*channels*len);
 }

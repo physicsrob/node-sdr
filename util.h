@@ -1,7 +1,8 @@
+#ifndef UTIL_H
+#define UTIL_H
+
 #include <stdio.h>
-#include <math.h>
 #include <node.h>
-#include <portaudio.h>
 #include <v8.h>
 
 using namespace v8;
@@ -16,3 +17,4 @@ static inline char *TO_CHAR(Handle<Value> val) {
     return str;
 }
 
+#endif

@@ -13,8 +13,6 @@ Handle<Value> ListDevices(const Arguments& args) {
     HandleScope scope;
 
 
-    Pa_Initialize();
-
     numDevices = Pa_GetDeviceCount();
     Local<Array> ret = Array::New(numDevices);
 
@@ -31,9 +29,6 @@ Handle<Value> ListDevices(const Arguments& args) {
         ret->Set(i, String::New(deviceInfo->name));
     }
 
-    Pa_Terminate();
-
-
     return scope.Close(ret);
 }
 
@@ -44,8 +39,6 @@ int GetDeviceNumber(const char *str) {
     HandleScope scope;
 
 
-    Pa_Initialize();
-
     numDevices = Pa_GetDeviceCount();
     Local<Array> ret = Array::New(numDevices);
 
@@ -53,12 +46,9 @@ int GetDeviceNumber(const char *str) {
     {
         deviceInfo = Pa_GetDeviceInfo( i );
         if(strcmp(deviceInfo->name, str)==0) {
-            Pa_Terminate();
             return i;
         }
     }
-    Pa_Terminate();
-
     return -1;
 }
 
