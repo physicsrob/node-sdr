@@ -12,7 +12,7 @@ FIRFilter::~FIRFilter() {
     if(FIR) { delete FIR; }
 }
 void FIRFilter::setSincFIR(float B, int l) {
-    B/=2*SAMPLE_RATE;
+    B/=2*input.getSampleRate();
     len = l;
     FIR = new float[2*l];
     center = (len - 1) / 2;

@@ -7,5 +7,9 @@
 Filter::Filter(Buffer &inp) : input(inp), output(inp) {
 }
 
+Filter::Filter(Buffer &inp, int ratio) : input(inp), output(inp,ratio) {
+}
+
+
 Filter::~Filter() {
 }

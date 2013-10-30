@@ -10,6 +10,7 @@ protected:
 
 public:
     Filter(Buffer &inp);
+    Filter(Buffer &inp, int sampleRatio);
     ~Filter();
 
     Buffer &getOutputBuffer() { return output; }
