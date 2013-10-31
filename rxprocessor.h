@@ -7,6 +7,9 @@
 #include "util.h"
 #include "buffer.h"
 #include "siggenfilter.h"
+#include "firfilter.h"
+#include "mixerfilter.h"
+#include <fftw3.h>
 
 using namespace v8;
 
@@ -15,15 +18,27 @@ protected:
     static RXProcessor *instance;
     Buffer srcBuf;
     PaStream *stream;
-    float frequency;
     SigGenFilter sig;
+
+    SigGenFilter vfo;
+    MixerFilter mixer;
+    FIRFilter bandpass;
+
+    float bw = 3000.0;
+
+    fftw_complex *fft_in, *fft_out;
+    fftw_plan fft_plan;
 
 private:
     RXProcessor();
+    ~RXProcessor();
 
 public:
     void start(char *input, char *output);
     void stop();
+    void setFrequency(float f) { vfo.setFreq(f); }
+    fftw_complex *runFFT();
+
     Buffer &getCurrentOutput();
 
 public: // Static methods
@@ -46,6 +61,16 @@ public: // Static methods
         getInstance()->stop();
         return scope.Close(Undefined());
     }
+
+    static Handle<Value> setFrequency(const Arguments& args) {
+        HandleScope scope;
+        getInstance()->setFrequency(args[0]->NumberValue());
+        return scope.Close(Undefined());
+    }
+
+    static Handle<Value> getFFT(const Arguments&args);
+
+
 
     static int callback( const void *inputBuffer, void *outputBuffer,
                          unsigned long framesPerBuffer,

@@ -67,8 +67,8 @@ void FIRFilter::process() {
         float valR = 0.0, valI = 0.0;
 
         for(int i=0; i<len; i++) {
-            valR += inpData[2*(i - len)] * FIR[2*i] - inpData[2*(i - len) + 1] * FIR[2*i + 1];
-            valI += inpData[2*(i - len)] * FIR[2*i + 1] + inpData[2*(i - len) + 1] * FIR[2*i];
+            valR += inpData[2*(s + i - len)] * FIR[2*i] - inpData[2*(s + i - len) + 1] * FIR[2*i + 1];
+            valI += inpData[2*(s + i - len)] * FIR[2*i + 1] + inpData[2*(s + i - len) + 1] * FIR[2*i];
         }
         outData[2*s] = valR;
         outData[2*s + 1] = valI;

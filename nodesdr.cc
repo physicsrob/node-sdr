@@ -26,6 +26,8 @@ void init(Handle<Object> target) {
     NODE_SET_METHOD(target, "getAudioDevices", ListDevices);
     NODE_SET_METHOD(target, "startRX", RXProcessor::start);
     NODE_SET_METHOD(target, "stopRX", RXProcessor::stop);
+    NODE_SET_METHOD(target, "setRXFrequency", RXProcessor::setFrequency);
+    NODE_SET_METHOD(target, "getFFT", RXProcessor::getFFT);
     NODE_SET_METHOD(target, "testFilter", TestFilter);
     atexit(cleanup);
 }

@@ -14,11 +14,11 @@ using namespace v8;
 float filter1(float freq) {
     float inPow, outPow;
 
-    Buffer b(2, 1024, SAMPLE_RATE);
+    Buffer b(2, 1024*64, SAMPLE_RATE);
     SigGenFilter sig(b);
     FIRFilter f(sig.getOutputBuffer());
-    f.setSincFIR(3000, 101);
-    f.shiftFilter(1500);
+    f.setSincFIR(1000, 101);
+    //f.shiftFilter(1500);
     f.windowBlackman();
 
     sig.setFreq(freq);
