@@ -167,20 +167,30 @@ Handle<Value> RXProcessor::getFFT(const Arguments&args)
 {
     HandleScope scope;
     int len = getInstance()->srcBuf.getLen();
+    int olen = 1024;
     fftw_complex *fft_out = getInstance()->runFFT();
     //double *fft_out = (double *)getInstance()->runFFT();
-    Local<Array> ret = Array::New(len);
+    Local<Array> ret = Array::New(olen);
     //fprintf(stderr, "fft1 %f\n", fft_out[100]);
-    float out[len], max=-1000.0, min=1000.0;
+    float out[olen], max=-1000.0, min=1000.0;
 
-    for(int i=0;i<len;i++) {
-        float val = fft_out[i][0]*fft_out[i][0]+ fft_out[i][1]*fft_out[i][1];
-        out[i]=val;
-        if(val>max) max=val;
-        if(val<min) min=val;
+    for(int i=0;i<olen;i++) {
+        out[i]=0;
     }
     for(int i=0;i<len;i++) {
-        ret->Set(i, Number::New((out[i] - min)/(max-min)));
+        float val = fft_out[i][0]*fft_out[i][0]+ fft_out[i][1]*fft_out[i][1];
+        out[i*olen/len]+=val;
+
+    }
+    for(int i=0;i<olen;i++) {
+        out[i] = log(out[i]);
+        if(out[i]>max) max=out[i];
+        if(out[i]<min) min=out[i];
+    }
+
+    for(int i=0;i<olen;i++) {
+        int outi = (i + olen/2)%olen; // Shift angle over
+        ret->Set(outi, Number::New(rint(100.0*(out[i] - min)/(max-min))));
     }
     return scope.Close(ret);
 }
