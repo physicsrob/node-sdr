@@ -6,11 +6,11 @@
 
 class SigGenFilter: public Filter {
     float freq;
-    int sampleNum;
+    double omega, domega;
 public:
     SigGenFilter(Buffer &b);
     ~SigGenFilter();
-    void setFreq(float f) { freq=f; }
+    void setFreq(float f);
     virtual void process();
 };
 

@@ -4,7 +4,7 @@
 #include <math.h>
 #include "util.h"
 #include "buffer.h"
-#include "rxprocessor.h"
+#include "AudioProcessor.h"
 #include "sampledef.h"
 #include <unistd.h>
 #include <fftw3.h>
@@ -12,15 +12,18 @@
 using namespace v8;
 int GetDeviceNumber(const char *str);
 
-RXProcessor *RXProcessor::instance = NULL;
+AudioProcessor *AudioProcessor::instance = NULL;
 
-RXProcessor::RXProcessor() :
+AudioProcessor::AudioProcessor() :
     srcBuf(2, FRAMES_PER_BUFFER, SAMPLE_RATE),
-    sig(srcBuf),
+    fakeSig(srcBuf), useFakeSig(false),
+    preTuneFilter(srcBuf),
     vfo(srcBuf),
-    mixer(srcBuf, vfo.getOutputBuffer()),
-    bandpass(mixer.getOutputBuffer())
+    mixer(preTuneFilter.getOutputBuffer(), vfo.getOutputBuffer()),
+    postTuneFilter(mixer.getOutputBuffer())
 {
+
+    /*
     vfo.setFreq(-5000.0);
     //sig.setFreq(10440.0);
 //    sig.setFreq(9560.0);
@@ -31,7 +34,7 @@ RXProcessor::RXProcessor() :
     bandpass.setSincFIR(2500, 201);
     bandpass.shiftFilter(1750.0);
     bandpass.windowBlackman();
-
+*/
 
     // Create FFT Plan
     fft_in = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * srcBuf.getLen());
@@ -39,13 +42,13 @@ RXProcessor::RXProcessor() :
     fft_plan = fftw_plan_dft_1d(srcBuf.getLen(), fft_in, fft_out, FFTW_FORWARD, FFTW_ESTIMATE);
 }
 
-RXProcessor::~RXProcessor() {
+AudioProcessor::~AudioProcessor() {
     fftw_destroy_plan(fft_plan);
     fftw_free(fft_in);
     fftw_free(fft_out);
 }
 
-void RXProcessor::start(char *input, char *output) {
+void AudioProcessor::start(char *input, char *output) {
     PaError err;
     PaStreamParameters inputParameters, outputParameters;
 
@@ -79,7 +82,7 @@ void RXProcessor::start(char *input, char *output) {
               SAMPLE_RATE,
               FRAMES_PER_BUFFER,
               0, /* paClipOff, */  /* we won't output out of range samples so don't bother clipping them */
-              &RXProcessor::callback,
+              &AudioProcessor::callback,
               NULL );
     if( err != paNoError ) {
         printf("Could not open stream");
@@ -93,33 +96,68 @@ void RXProcessor::start(char *input, char *output) {
 
 }
 
-void RXProcessor::stop() {
+void AudioProcessor::stop() {
     PaError err;
     err = Pa_CloseStream( stream );
 }
 
-Buffer &RXProcessor::getCurrentOutput() {
+
+fftw_complex * AudioProcessor::runFFT(bool src) {
+
+    if(src) {
+        for(int i=0;i<srcBuf.getLen();i++) {
+            fft_in[i][0] = srcBuf.getData()[2*i];
+            fft_in[i][1] = srcBuf.getData()[2*i + 1];
+        }
+    } else {
+        for(int i=0;i<srcBuf.getLen();i++) {
+            fft_in[i][0] = postTuneFilter.getOutputBuffer().getData()[2*i];
+            fft_in[i][1] = postTuneFilter.getOutputBuffer().getData()[2*i + 1];
+        }
+    }
+
+    fftw_execute(fft_plan);
+    return fft_out;
+}
+
+
+
+Buffer &AudioProcessor::getCurrentOutput() {
     // Needs to be about 5 times faster than real time
     // e.g. if buffer is 100ms, this function must complete in 20ms
     //
 
     //
-//    sig.process();
     vfo.process();
+    preTuneFilter.process();
     mixer.process();
-    bandpass.process();
+    postTuneFilter.process();
+
     float inPow = srcBuf.getAvgSqr();
-    float outPow = bandpass.getOutputBuffer().getAvgSqr();
+    float outPow = postTuneFilter.getOutputBuffer().getAvgSqr();
     fprintf(stderr, "%f dB\n", 10.0*log10(outPow/inPow));
 
-    return bandpass.getOutputBuffer();
-//    return srcBuf;//.getOutputBuffer();
+    return postTuneFilter.getOutputBuffer();
+}
 
+void AudioProcessor::setMode(int m) {
+    if(m==MODE_USB_RX) {
+        preTuneFilter.setUnity();
+        postTuneFilter.setSincFIR(2500, 201);
+        postTuneFilter.shiftFilter(1750.0);
+        postTuneFilter.windowBlackman();
+
+    } else if(m==MODE_USB_TX) {
+        preTuneFilter.setSincFIR(2500, 201);
+        preTuneFilter.shiftFilter(1750.0);
+        preTuneFilter.windowBlackman();
+        //preTuneFilter.setUnity();
+        postTuneFilter.setUnity();
+    }
 }
 
 
-
-int RXProcessor::callback( const void *inputBuffer, void *outputBuffer,
+int AudioProcessor::callback( const void *inputBuffer, void *outputBuffer,
                      unsigned long framesPerBuffer,
                      const PaStreamCallbackTimeInfo* timeInfo,
                      PaStreamCallbackFlags statusFlags,
@@ -130,6 +168,13 @@ int RXProcessor::callback( const void *inputBuffer, void *outputBuffer,
     (void) timeInfo; /* Prevent unused variable warnings. */
     (void) statusFlags;
     (void) userData;
+
+
+    if(getInstance()->useFakeSig) {
+        getInstance()->fakeSig.process();
+        in=getInstance()->fakeSig.getOutputBuffer().getData();
+    }
+
 
     if( inputBuffer == NULL )
     {
@@ -151,24 +196,12 @@ int RXProcessor::callback( const void *inputBuffer, void *outputBuffer,
     return paContinue;
 
 }
-
-
-fftw_complex * RXProcessor::runFFT() {
-    for(int i=0;i<srcBuf.getLen();i++) {
-        fft_in[i][0] = srcBuf.getData()[2*i];
-        fft_in[i][1] = srcBuf.getData()[2*i + 1];
-    }
-
-    fftw_execute(fft_plan);
-    return fft_out;
-}
-
-Handle<Value> RXProcessor::getFFT(const Arguments&args)
+Handle<Value> AudioProcessor::getFFT(const Arguments&args)
 {
     HandleScope scope;
     int len = getInstance()->srcBuf.getLen();
     int olen = 1024;
-    fftw_complex *fft_out = getInstance()->runFFT();
+    fftw_complex *fft_out = getInstance()->runFFT(args[0]->IsTrue());
     //double *fft_out = (double *)getInstance()->runFFT();
     Local<Array> ret = Array::New(olen);
     //fprintf(stderr, "fft1 %f\n", fft_out[100]);
