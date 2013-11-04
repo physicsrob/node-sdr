@@ -1,0 +1,34 @@
+<script data-main="scripts/main.js" src="scripts/require-jquery.js"></script>
+<div class="container">
+	<div class="row" style="padding-top:10px; padding-bottom:10px;">
+        <form>
+        <div class="col-md-3">
+            <div class="btn-group" data-toggle="buttons">
+              <label class="btn btn-primary">
+                <input type="radio" name="options" id="modeIdle"> Idle
+              </label>
+              <label class="btn btn-primary">
+                <input type="radio" name="options" id="modeRX"> RX
+              </label>
+              <label class="btn btn-primary">
+                <input type="radio" name="options" id="modeTX"> TX
+              </label>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <label>VFO <input type="text" id="vfo">
+            </label>
+        </div>
+        <div class="col-md-3">
+            <label>TUNE <input type="text" id="tune">
+            </label>
+        </div>
+        </form>
+    </div>
+    <div class="row">
+        <canvas id="fftCanvas" width="1024" height="512" style="border: 1px solid #000;">
+        </canvas>
+    </div>
+</div>
+
+

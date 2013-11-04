@@ -1,0 +1,23 @@
+{
+    "name": "node-sdr",
+    "description": "Application written in Node and C++ for using a softrock SDR",
+    "author": {
+        "name": "Rob Porter",
+        "email": "physicsrob@gmail.com"
+    },
+    "version": "0.0.1",
+    "engines": {
+        "node": ">=0.8.x"
+    },
+    "scripts": {
+        "preinstall": "node-gyp rebuild"
+    },
+    "dependencies": {
+        "express": "=2.5.9",
+        "ejs": ">= 0.0.1",
+        "requirejs": "= 2.1.4",
+        "underscore": ">= 1.1.7",
+        "Deferred": ">= 0.1.1"
+    },
+    "license": "BSD"
+}

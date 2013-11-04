@@ -132,10 +132,10 @@ Buffer &AudioProcessor::getCurrentOutput() {
     preTuneFilter.process();
     mixer.process();
     postTuneFilter.process();
-
+/*
     float inPow = srcBuf.getAvgSqr();
     float outPow = postTuneFilter.getOutputBuffer().getAvgSqr();
-    fprintf(stderr, "%f dB\n", 10.0*log10(outPow/inPow));
+    fprintf(stderr, "%f dB\n", 10.0*log10(outPow/inPow));*/
 
     return postTuneFilter.getOutputBuffer();
 }
@@ -187,7 +187,7 @@ int AudioProcessor::callback( const void *inputBuffer, void *outputBuffer,
     }
     else
     {
-        fprintf(stderr, "%d frames\n", framesPerBuffer);
+        //fprintf(stderr, "%d frames\n", framesPerBuffer);
         getInstance()->srcBuf.addData(in);
         Buffer &outBuf = getInstance()->getCurrentOutput();
         memcpy(out, outBuf.getData(), framesPerBuffer*sizeof(SAMPLE)*2);
