@@ -28,6 +28,9 @@ protected:
     MixerFilter mixer;
     FIRFilter postTuneFilter;
 
+    float iq_tx_alpha, iq_tx_epsilon, iq_rx_alpha, iq_rx_epsilon;
+    int mode;
+
     PaStream *stream;
     fftw_complex *fft_in, *fft_out;
     fftw_plan fft_plan;
@@ -45,6 +48,12 @@ public:
 
     void setTuner(float f) { vfo.setFreq(f); }
     void setFakeSource(float f) { fakeSig.setFreq(f); useFakeSig=true;}
+    void setIQBal(float txa, float txe, float rxa, float rxe) {
+        iq_tx_alpha = txa;
+        iq_tx_epsilon = txe;
+        iq_rx_alpha = rxa;
+        iq_rx_epsilon = rxe;
+    }
 
 public: // Static methods
     static AudioProcessor *getInstance() {
@@ -94,6 +103,12 @@ public: // Static methods
     static Handle<Value> getSampleRate(const Arguments& args) {
         HandleScope scope;
         return scope.Close(Number::New(SAMPLE_RATE));
+    }
+
+    static Handle<Value> setIQBal(const Arguments& args) {
+        HandleScope scope;
+        getInstance()->setIQBal(args[0]->NumberValue(),args[1]->NumberValue(),args[2]->NumberValue(),args[3]->NumberValue());
+        return scope.Close(Undefined());
     }
 
 

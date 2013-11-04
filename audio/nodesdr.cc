@@ -35,6 +35,7 @@ void init(Handle<Object> target) {
     NODE_SET_METHOD(target, "setFakeSource", AudioProcessor::setFakeSource);
     NODE_SET_METHOD(target, "setMode", AudioProcessor::setMode);
     NODE_SET_METHOD(target, "getSampleRate", AudioProcessor::getSampleRate);
+    NODE_SET_METHOD(target, "setIQBal", AudioProcessor::setIQBal);
     NODE_SET_METHOD(target, "testFilter", TestFilter);
     atexit(cleanup);
 }

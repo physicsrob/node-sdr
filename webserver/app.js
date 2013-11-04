@@ -34,7 +34,8 @@ process.on('uncaughtException', function (err) {
 });
 
 
-require ('./pages')(app);
+require ('./mainPage')(app);
+require ('./configPage')(app);
 require ('./control')(app);
 
 app.listen(5555);

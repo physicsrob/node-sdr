@@ -1,0 +1,65 @@
+<script data-main="scripts/config.js" src="scripts/require-jquery.js"></script>
+<script src="scripts/bootstrap-slider.js"></script>
+<div class="container">
+    <div class="row" style="padding:10px;">
+        <h2>Config</h1>
+    </div>
+    <div class="row">
+        <label for="iq_input" class="col-md-2">IQ Input </label>
+        <select id="iq_input" class="col-md-4">
+            <% _.each(audio_devices, function(dev) { %>
+                <option value="<%= dev %>" <% if(dev==config.iq_input) { %>selected="selected" <% } %>><%=dev %></option>
+            <% }); %>
+        </select>
+    </div>
+    <div class="row">
+        <label for="iq_output" class="col-md-2">IQ Output</label>
+        <select id="iq_output" class="col-md-4">
+            <% _.each(audio_devices, function(dev) { %>
+                <option value="<%= dev %>" <% if(dev==config.iq_output) { %>selected="selected" <% } %>><%=dev %></option>
+            <% }); %>
+        </select>
+    </div>
+    <div class="row">
+        <label for="usb_input" class="col-md-2">USB Input </label>
+        <select id="usb_input" class="col-md-4">
+            <% _.each(audio_devices, function(dev) { %>
+                <option value="<%= dev %>" <% if(dev==config.usb_input) { %>selected="selected" <% } %>><%=dev %></option>
+            <% }); %>
+        </select>
+    </div>
+    <div class="row">
+        <label for="usb_output" class="col-md-2">USB Output </label>
+        <select id="usb_output" class="col-md-4">
+            <% _.each(audio_devices, function(dev) { %>
+                <option value="<%= dev %>" <% if(dev==config.usb_output) { %>selected="selected" <% } %>><%=dev %></option>
+            <% }); %>
+        </select>
+    </div>
+    <div class="row">
+        <label for="iq_tx_alpha" class="col-md-2">TX IQ Alpha</label>
+        <div class="col-md-4">
+        <div id="iq_tx_alpha" class="slider" style="width: 100%;" data-slider-min="-0.5" data-slider-max="+0.5" data-slider-step="0.025" data-slider-value="<%= config.iq_tx_alpha || 0.0 %>" data-slider-orientation="horizontal"></div>
+        </div>
+    </div>
+    <div class="row">
+        <label for="iq_tx_epsilon" class="col-md-2">TX IQ Epsilon</label>
+        <div class="col-md-4">
+        <div id="iq_tx_epsilon" class="slider" style="width: 100%;" data-slider-min="-0.5" data-slider-max="+0.5" data-slider-step="0.025" data-slider-value="<%= config.iq_tx_epsilon || 0.0 %>" data-slider-orientation="horizontal"></div>
+        </div>
+    </div>
+    <div class="row">
+        <label for="iq_rx_alpha" class="col-md-2">RX IQ Alpha</label>
+        <div class="col-md-4">
+        <div id="iq_rx_alpha" class="slider" style="width: 100%;" data-slider-min="-0.2" data-slider-max="+0.2" data-slider-step="0.025" data-slider-value="<%= config.iq_rx_alpha || 0.0 %>" data-slider-orientation="horizontal"></div>
+        </div>
+    </div>
+    <div class="row">
+        <label for="iq_rx_epsilon" class="col-md-2">RX IQ Epsilon</label>
+        <div class="col-md-4">
+        <div id="iq_rx_epsilon" class="slider" style="width: 100%;" data-slider-min="-0.2" data-slider-max="+0.2" data-slider-step="0.025" data-slider-value="<%= config.iq_rx_epsilon || 0.0 %>" data-slider-orientation="horizontal"></div>
+        </div>
+    </div>
+</div>
+
+

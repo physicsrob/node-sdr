@@ -13,6 +13,12 @@ function addRow(context, data, width, height) {
         rowImg.data[4*i + 3] = 255;
     }
 
+    var c = data.length/2;
+    rowImg.data[4*c + 0] = 0;
+    rowImg.data[4*c + 1] = 0;
+    rowImg.data[4*c + 2] = 255;
+    rowImg.data[4*c + 3] = 255;
+
     context.putImageData(imageData, 0, 1);
     context.putImageData(rowImg, 0,0);
 }
@@ -29,6 +35,7 @@ define([], function() {
             output.data[4*(y*width + x) + 1] = 0;
             output.data[4*(y*width + x) + 2] = 0;
             output.data[4*(y*width + x) + 3] = 255;
+            if(x==(width/2)) { output.data[4*(y*width + x) + 2] = 255; }
         }
     }
     ctx.putImageData(output, 0, 0);
@@ -40,6 +47,11 @@ define([], function() {
         });
     }, 100);
 
+
+    return {
+        updateFreqInfo: function(min, max, tuned_min, tuned_max) {
+        }
+    };
 //ctx.putImageData(imgData,0,0);
     
 //    ctx.fillStyle="#FF0000";

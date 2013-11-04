@@ -141,6 +141,7 @@ Buffer &AudioProcessor::getCurrentOutput() {
 }
 
 void AudioProcessor::setMode(int m) {
+    mode=m;
     if(m==MODE_USB_RX) {
         preTuneFilter.setUnity();
         postTuneFilter.setSincFIR(2500, 201);
@@ -170,6 +171,7 @@ int AudioProcessor::callback( const void *inputBuffer, void *outputBuffer,
     (void) userData;
 
 
+
     if(getInstance()->useFakeSig) {
         getInstance()->fakeSig.process();
         in=getInstance()->fakeSig.getOutputBuffer().getData();
@@ -188,9 +190,29 @@ int AudioProcessor::callback( const void *inputBuffer, void *outputBuffer,
     else
     {
         //fprintf(stderr, "%d frames\n", framesPerBuffer);
-        getInstance()->srcBuf.addData(in);
+        Buffer &srcBuf = getInstance()->srcBuf;
+        srcBuf.addData(in);
+        SAMPLE *srcBufData = srcBuf.getData();
+        if(getInstance()->mode==MODE_USB_RX) {
+            // Perform IQ adjustment on input
+            for(int i=0;i<framesPerBuffer; i++) {
+                srcBufData[2*i+1] = (1.0 + getInstance()->iq_rx_epsilon) * srcBufData[2*i+1] - getInstance()->iq_rx_alpha * srcBufData[2*i];
+            }
+        }
         Buffer &outBuf = getInstance()->getCurrentOutput();
         memcpy(out, outBuf.getData(), framesPerBuffer*sizeof(SAMPLE)*2);
+        if(getInstance()->mode==MODE_USB_TX) {
+            // Perform IQ adjustment on output
+            float I, Q;
+
+            for(int i=0;i<framesPerBuffer; i++) {
+                I=out[2*i];
+                Q=out[2*i+1];
+                Q = (1.0 + getInstance()->iq_tx_epsilon) * Q - getInstance()->iq_tx_alpha * I;
+                out[2*i]=Q; // Flip I/Q
+                out[2*i + 1]=I;
+            }
+        }
     }
 
     return paContinue;
