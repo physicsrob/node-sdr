@@ -1,37 +1,27 @@
 define([], function() {
-    var currentMode = 'idle';
-    var vfoFreq = 14000, tuneFreq=14010;
-    function tune() {
-        $.post("/tune", {vfo:vfoFreq, tune:tuneFreq}, function() {
+
+    return function(controller) {
+        $("#modeIdle").parent().click(function(){
+            controller.changeMode('idle');
         });
-    }
 
-    $("#modeIdle").parent().click(function(){
-        currentMode='idle';
-    });
-
-    $("#modeRX").parent().click(function(){
-        currentMode='RX';
-    });
-
-    $("#modeTX").parent().click(function(){
-        currentMode='TX';
-    });
-
-    $("#vfo").change(function() {
-        vfoFreq=$(this).val();
-        tune();
-    });
-
-    $("#tune").change(function() {
-        tuneFreq=$(this).val();
-        tune();
-    });
-
-    setInterval(function() {
-        $.post("/run", {mode:currentMode}, function() {
+        $("#modeRX").parent().click(function(){
+            controller.changeMode('RX');
         });
-    }, 100);
+
+        $("#modeTX").parent().click(function(){
+            controller.changeMode('TX');
+        });
+
+        $("#vfo").change(function() {
+            controller.changeVFO($(this).val());
+        });
+
+        $("#tune").change(function() {
+            controller.changeTune($(this).val());
+        });
+    };
+
 
 });
 
